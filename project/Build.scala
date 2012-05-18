@@ -10,7 +10,6 @@ object ApplicationBuild extends Build {
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
-      "org.zeromq" %% "zeromq-scala-binding" % "0.0.3",
       "org.scala-tools.time" %% "time" % "0.5",
       "com.gu.openplatform" %% "content-api-client" % "1.13",
       "com.typesafe.akka" % "akka-agent" % "2.0",
