@@ -13,26 +13,12 @@ import ops._
 
 object Backend {
   implicit val system = ActorSystem("liveDashboard")
-  val calculator = system.actorOf(Props[Calculator], name = "calculator")
   val listener = system.actorOf(Props(new ClickStreamActor(Config.eventHorizon)), name = "clickStreamListener")
-  val searchTerms = system.actorOf(Props[SearchTermActor], name = "searchTermProcessor")
 
-  val latestContent = new LatestContent
-
-  val ukFrontLinkTracker = new LinkTracker("http://www.guardian.co.uk")
-  val usFrontLinkTracker = new LinkTracker("http://www.guardiannews.com")
-
-  val eventProcessors = listener :: searchTerms :: Nil
+  val eventProcessors = listener :: Nil
 
   def start() {
     system.scheduler.schedule(1 minute, 1 minute, listener, ClickStreamActor.TruncateClickStream)
-    system.scheduler.schedule(5 seconds, 5 seconds, listener, ClickStreamActor.SendClickStreamTo(calculator))
-    system.scheduler.schedule(5 seconds, 30 seconds) { latestContent.refresh() }
-    system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
-    system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
-
-    listener ! Event("1.1.1.1", new DateTime(), "/dummy", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
-    searchTerms ! Event("1.1.1.1", new DateTime(), "/search?q=dummy&a=b&c=d%2Fj", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
   }
 
   def stop() {
@@ -44,25 +30,8 @@ object Backend {
 
   implicit val timeout = Timeout(5 seconds)
 
-  def currentStats = Await.result( (calculator ? Calculator.GetStats).mapTo[(List[HitReport], ListsOfStuff)], 5 seconds)
-
-  def currentLists = currentStats._2
-
-  def currentHits = currentStats._1
-
-  def liveSearchTermsFuture = (searchTerms ? SearchTermActor.GetSearchTerms).mapTo[List[GuSearchTerm]]
-  def liveSearchTerms = Await.result(liveSearchTermsFuture, timeout.duration)
-
   def eventsFrom(page: String) = (listener ? ClickStreamActor.GetClickStream).mapTo[ClickStream] map { clickStream =>
     clickStream.userClicks.filter(_.referrer == Some(page))
   }
 
-  // this one uses an agent: this is the model that others should follow
-  // (agents are multi non-blocking read, single update)
-  def publishedContent = latestContent.latest()
-
-  def minutesOfData = {
-    val currentData = currentLists
-    new Duration(currentData.firstUpdated, currentData.lastUpdated).getStandardMinutes
-  }
 }
