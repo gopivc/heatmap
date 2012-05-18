@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description" : "Live Stats Dashboard",
+    "Description" : "Live Heatmap",
     "Parameters" : {
       "KeyName" : {
         "Description" : "The EC2 Key Pair to allow SSH access to the instance",
@@ -22,8 +22,8 @@
 
   "Mappings" : {
     "Domain" : {
-      "PROD" : { "Name" : "dashboard.ophan.co.uk" },
-      "TEST": { "Name" : "test-dashboard.ophan.co.uk" }
+      "PROD" : { "Name" : "heatmap.ophan.co.uk" },
+      "TEST": { "Name" : "test-heatmap.ophan.co.uk" }
     }
   },
 
@@ -77,7 +77,7 @@
         "LoadBalancerNames" : [ { "Ref": "LoadBalancer" }],
         "Tags" : [
           { "Key" : "Stage", "Value" : { "Ref" : "Stage" }, "PropagateAtLaunch" : "true"  },
-          { "Key" : "App", "Value" : "live-dashboard", "PropagateAtLaunch" : "true"  }
+          { "Key" : "App", "Value" : "heatmap", "PropagateAtLaunch" : "true"  }
         ],
         "NotificationConfiguration" : { 
           "TopicARN" : "arn:aws:sns:eu-west-1:021353022223:ophan-service-notifications",
@@ -110,19 +110,19 @@
             "chown jvmuser:jvmuser /home/jvmuser/.ssh\n",
             "chown jvmuser:jvmuser /home/jvmuser/.ssh/authorized_keys\n",
 
-            "echo 'jvmuser ALL = NOPASSWD:/sbin/service live-dashboard *' >> /etc/sudoers\n",
+            "echo 'jvmuser ALL = NOPASSWD:/sbin/service heatmap *' >> /etc/sudoers\n",
 
             "cat > /etc/stage <<EOF\n",
             { "Ref" : "Stage" }, "\n",
             "EOF\n",
 
-            "wget https://s3-eu-west-1.amazonaws.com/ophan-dist/", { "Ref" : "Stage" }, "/live-dashboard -O /etc/init.d/live-dashboard\n",
+            "wget https://s3-eu-west-1.amazonaws.com/ophan-dist/", { "Ref" : "Stage" }, "/heatmap -O /etc/init.d/heatmap\n",
 
-            "chmod +x /etc/init.d/live-dashboard\n",
+            "chmod +x /etc/init.d/heatmap\n",
 
-            "chkconfig --add live-dashboard\n",
+            "chkconfig --add heatmap\n",
 
-            "service live-dashboard start\n"
+            "service heatmap start\n"
 
         ]]}}
 

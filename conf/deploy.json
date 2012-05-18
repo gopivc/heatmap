@@ -1,6 +1,6 @@
 {
     "packages":{
-        "live-dashboard":{
+        "heatmap":{
             "type":"executable-jar-webapp",
             "data":{
                 "port":"9000",
@@ -16,10 +16,10 @@
             "depends" : ["artifactUploadOnly", "deployOnly"]
         },
         "deployOnly":{
-            "actionsPerHost": ["live-dashboard.deploy"]
+            "actionsPerHost": ["heatmap.deploy"]
         },
         "artifactUploadOnly":{
-            "actionsBeforeApp": ["live-dashboard.uploadArtifacts"]
+            "actionsBeforeApp": ["heatmap.uploadArtifacts"]
         }
     }
 }

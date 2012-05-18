@@ -6,8 +6,8 @@ import AssemblyKeys._
 
 object ApplicationBuild extends Build {
 
-    val appName         = "live-dashboard"
-    val appVersion      = "1.1"
+    val appName         = "heatmap"
+    val appVersion      = "1.0"
 
     val appDependencies = Seq(
       "org.zeromq" %% "zeromq-scala-binding" % "0.0.3",

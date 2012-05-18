@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # chkconfig:    2345 80 20
-# description: live-dashboard run as an executable jar
+# description: heatmap run as an executable jar
 
 . /etc/rc.d/init.d/functions
 
 USER=jvmuser
-APP_NAME=live-dashboard
+APP_NAME=heatmap
 APP_HOME=/executable-jar-apps/$APP_NAME
 PIDFILE=$APP_HOME/RUNNING_PID
 RETVAL=0
