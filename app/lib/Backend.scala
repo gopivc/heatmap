@@ -24,8 +24,6 @@ object Backend {
 
   val eventProcessors = listener :: searchTerms :: Nil
 
-  val mqReader = new MqReader(eventProcessors)
-
   def start() {
     system.scheduler.schedule(1 minute, 1 minute, listener, ClickStreamActor.TruncateClickStream)
     system.scheduler.schedule(5 seconds, 5 seconds, listener, ClickStreamActor.SendClickStreamTo(calculator))
@@ -33,20 +31,11 @@ object Backend {
     system.scheduler.schedule(1 seconds, 20 seconds) { ukFrontLinkTracker.refresh() }
     system.scheduler.schedule(20 seconds, 60 seconds) { usFrontLinkTracker.refresh() }
 
-    if (Config.listenToMessageQueue) {
-      spawn {
-        mqReader.start()
-      }
-    }
-
     listener ! Event("1.1.1.1", new DateTime(), "/dummy", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
     searchTerms ! Event("1.1.1.1", new DateTime(), "/search?q=dummy&a=b&c=d%2Fj", "GET", 200, Some("http://www.google.com"), "my agent", "geo!")
   }
 
   def stop() {
-    if (Config.listenToMessageQueue) {
-      mqReader.stop()
-    }
     system.shutdown()
   }
 
