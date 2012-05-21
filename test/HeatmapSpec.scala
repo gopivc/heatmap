@@ -12,21 +12,11 @@ import play.api.test.{FakeApplication, FakeHeaders, FakeRequest}
 class HeatmapSpec extends Specification{
   "should make clicks available in heatmap" in {
     running(FakeApplication()) {
-      val views = snsMessageOf(PageViews(List(PageView(
-        v = "3",
-        dt = DateTime.now(),
-        url = "http://site.com/page",
-        documentReferrer = Some("http://site.com/referrer"),
-        browserId = BrowserId(""),
-        userAgent = None,
-        clientIp = None,
-        previousPage = Some("http://site.com/referrer"),
-        previousPageSelector = Some("selector"),
-        previousPageElemHash = Some("hash")
-      ))))
+      val views = snsMessageOf(PageViews(List(view("http://site.com/page", "http://site.com/referrer"))))
       routeAndCall(FakeRequest("POST", "/incoming/sns", FakeHeaders(), AnyContentAsText(views)))
 
-      val Some(AsyncResult(result)) = routeAndCall(FakeRequest("GET", "/api/linkCounts?page=%s" format ("http://site.com/referrer")))
+      val Some(AsyncResult(result)) = routeAndCall(
+        FakeRequest("GET", "/api/linkCounts?page=%s" format ("http://site.com/referrer")))
       val resultJson = contentAsString(result.await.get)
       val counts = json.parse(resultJson).extract[List[LinkCount]]
 
@@ -34,11 +24,23 @@ class HeatmapSpec extends Specification{
     }
   }
 
-
-  implicit val formats = DefaultFormats ++ net.liftweb.json.ext.JodaTimeSerializers.all
+  def view(url: String, referrer: String, selector: String = "selector", hash: String = "hash") =
+    PageView(
+      v = "3",
+      dt = DateTime.now(),
+      url = url,
+      documentReferrer = Some(referrer),
+      browserId = BrowserId(""),
+      userAgent = None,
+      clientIp = None,
+      previousPage = Some(referrer),
+      previousPageSelector = Some(selector),
+      previousPageElemHash = Some(hash)
+    )
 
   def snsMessageOf(views: PageViews) = {
     val n = SNS.SNSNotification(Serialization.write(views), "topic", "Notification", None)
     Serialization.write(n)
   }
+  implicit val formats = DefaultFormats ++ net.liftweb.json.ext.JodaTimeSerializers.all
 }
