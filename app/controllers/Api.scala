@@ -19,15 +19,9 @@ object Api extends Controller {
 
   def linkCount(page: String, callback: Option[String] = None) = Action {
     Async {
-      Backend.eventsFrom(page).asPromise map { events =>
+      Backend.eventsFrom(page).asPromise map { linkCounts =>
         withCallback(callback) {
-          val eventMap = events groupBy { e => (e.sel.getOrElse(""), e.hash.getOrElse("")) }
-
-          val linkCounts = for {
-            ((selector, hash), clicks) <- eventMap
-          } yield LinkCount(selector, hash, clicks.size)
-
-          Serialization.write(linkCounts.toList)
+          Serialization.write(linkCounts)
         }
       }
     }
