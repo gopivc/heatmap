@@ -3,10 +3,10 @@ package lib
 import akka.actor.{Actor, ActorLogging}
 import org.scala_tools.time.Imports._
 import lib.LinkCountActor.Truncate
-import collection.mutable.{HashMap, MultiMap}
 import collection.mutable
 import controllers.Api.LinkCount
 import util.Random
+import collection.mutable.{MultiMap, HashMap}
 
 case class LinkIdentifier(selector: String, hash: String)
 case class Click(page: String, selector: String, hash: String, dt: DateTime) {
@@ -15,18 +15,21 @@ case class Click(page: String, selector: String, hash: String, dt: DateTime) {
 case class Page(url: String)
 
 class Clicks {
-  val clicks = mutable.Map[String, MultiMap[LinkIdentifier, (DateTime, Int)]]().withDefaultValue(
-    new HashMap[LinkIdentifier, mutable.Set[(DateTime, Int)]] with MultiMap[LinkIdentifier, (DateTime, Int)]
-  )
-  val random = new Random()
+  val clicks = mutable.Map.empty[String, MultiMap[LinkIdentifier, (DateTime, Int)]]
+  val random = new Random
+  def emptyMulti = new HashMap[LinkIdentifier, mutable.Set[(DateTime, Int)]] with MultiMap[LinkIdentifier, (DateTime, Int)]
 
   def += (click: Click) {
-    val linkClicks = clicks(click.page)
+    val linkClicks = (clicks.get(click.page).orElse {
+      val v = emptyMulti
+      clicks.put(click.page, v)
+      Some(v)
+    }).get
     linkClicks.addBinding(click.link, (click.dt, random.nextInt()))
   }
 
   def linkCountsFor(page: String) = {
-    val copyOfPageClicks = clicks(page).toSeq
+    val copyOfPageClicks = (clicks.get(page).orElse(Some(emptyMulti))).get.toSeq
     (for { (k,v) <- copyOfPageClicks } yield LinkCount(k.selector, k.hash, v.size)) toList
   }
 
