@@ -10,17 +10,35 @@ import play.api.test.Helpers._
 import play.api.test.{FakeApplication, FakeHeaders, FakeRequest}
 
 class HeatmapSpec extends Specification{
-  "should make clicks available in heatmap" in {
-    running(FakeApplication()) {
-      val views = snsMessageOf(PageViews(List(view("http://site.com/page", "http://site.com/referrer"))))
-      routeAndCall(FakeRequest("POST", "/incoming/sns", FakeHeaders(), AnyContentAsText(views)))
+  "clicks for heatmap" should {
+//    "provide links with appropriate referrer" in {
+//      running(FakeApplication()) {
+//        val views = snsMessageOf(PageViews(List(view("http://site.com/page", "http://site.com/referrer"))))
+//        routeAndCall(FakeRequest("POST", "/incoming/sns", FakeHeaders(), AnyContentAsText(views)))
+//
+//        val Some(AsyncResult(result)) = routeAndCall(
+//          FakeRequest("GET", "/api/linkCounts?page=%s" format ("http://site.com/referrer")))
+//        val resultJson = contentAsString(result.await.get)
+//        val counts = json.parse(resultJson).extract[List[LinkCount]]
+//
+//        counts(0) should be equalTo (LinkCount("selector", "hash", 1))
+//      }
+//    }
+    "provide counts of multiple clicks of the same link" in {
+      running(FakeApplication()) {
+        val views = snsMessageOf(PageViews(List(
+          view("http://site.com/page", "http://site.com/referrer"),
+          view("http://site.com/page", "http://site.com/referrer")
+        )))
+        routeAndCall(FakeRequest("POST", "/incoming/sns", FakeHeaders(), AnyContentAsText(views)))
 
-      val Some(AsyncResult(result)) = routeAndCall(
-        FakeRequest("GET", "/api/linkCounts?page=%s" format ("http://site.com/referrer")))
-      val resultJson = contentAsString(result.await.get)
-      val counts = json.parse(resultJson).extract[List[LinkCount]]
+        val Some(AsyncResult(result)) = routeAndCall(
+          FakeRequest("GET", "/api/linkCounts?page=%s" format ("http://site.com/referrer")))
+        val resultJson = contentAsString(result.await.get)
+        val counts = json.parse(resultJson).extract[List[LinkCount]]
 
-      counts(0) should be equalTo (LinkCount("selector", "hash", 1))
+        counts(0) should be equalTo (LinkCount("selector", "hash", 2))
+      }
     }
   }
 

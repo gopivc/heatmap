@@ -10,19 +10,23 @@ import akka.util.Timeout
 import akka.pattern.ask
 import concurrent.ops
 import ops._
+import play.api.libs.concurrent.Akka
+import play.api.Play
+import controllers.Api.LinkCount
 
 object Backend {
-  implicit val system = ActorSystem("liveDashboard")
-  val listener = system.actorOf(Props(new ClickStreamActor(Config.eventHorizon)), name = "clickStreamListener")
+  import Play.current
 
-  val eventProcessors = listener :: Nil
+  val counter = Akka.system.actorOf(Props(new LinkCountActor(Config.eventHorizon)), name = "linkCounter")
+
+  val eventProcessors = counter :: Nil
 
   def start() {
-    system.scheduler.schedule(1 minute, 1 minute, listener, ClickStreamActor.TruncateClickStream)
+    Akka.system.scheduler.schedule(1 minute, 1 minute, counter, LinkCountActor.Truncate)
   }
 
   def stop() {
-    system.shutdown()
+    Akka.system.shutdown()
   }
 
   // So this is a bad way to do this, should use akka Agents instead (which can read
@@ -30,8 +34,6 @@ object Backend {
 
   implicit val timeout = Timeout(5 seconds)
 
-  def eventsFrom(page: String) = (listener ? ClickStreamActor.GetClickStream).mapTo[ClickStream] map { clickStream =>
-    clickStream.userClicks.filter(_.referrer == Some(page))
-  }
+  def eventsFrom(page: String) = (counter ? Page(page)).mapTo[List[LinkCount]]
 
 }

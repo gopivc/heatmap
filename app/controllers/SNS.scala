@@ -4,9 +4,8 @@ import play.api.mvc.{Action, Controller}
 import play.api.libs.ws.WS
 import net.liftweb.json
 import json.DefaultFormats
-import json.JsonAST.JValue
 import org.joda.time.DateTime
-import lib.{Backend, Event}
+import lib.{Click, Backend}
 
 
 object SNS extends Controller {
@@ -19,22 +18,13 @@ object SNS extends Controller {
       notification.Type match {
         case "Notification" =>  {
           val pageViews = (json.parse(notification.Message)).extract[PageViews]
-          val events = pageViews.views map { view => Event(
-            ip = view.clientIp.getOrElse("-"),
-            dt = view.dt,
-            url = view.url,
-            method = "GET",
-            responseCode = 200,
-            referrer = view.documentReferrer,
-            userAgent = view.userAgent.getOrElse("-"),
-            geo = "-",
-            sel = view.previousPageSelector,
-            hash = view.previousPageElemHash
-          )}
           for {
-            e <- events.filterNot(_.isSelfRefresh)
+            view <- pageViews.views
             actor <- Backend.eventProcessors
-          } actor ! e
+            page <- view.previousPage
+            selector <- view.previousPageSelector
+            hash <- view.previousPageElemHash
+          } actor ! Click(page, selector, hash, view.dt)
 
           Ok("")
         }
