@@ -97,12 +97,11 @@
       "DependsOn" : "HostKeys",
       "Properties" : {
         "KeyName" : { "Ref" : "KeyName" },
-        "ImageId" : "ami-f9231b8d",
+        "ImageId" : "ami-c37474b7",
         "SecurityGroups": [ { "Ref" : "EC2SecurityGroup" } ],
         "InstanceType" : { "Ref" : "InstanceType" },
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
             "#!/bin/bash -ev\n",
-            "yum -y update\n",
 
             "adduser --system --create-home jvmuser\n",
 
