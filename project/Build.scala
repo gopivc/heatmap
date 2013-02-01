@@ -6,7 +6,7 @@ import AssemblyKeys._
 
 object ApplicationBuild extends Build {
 
-    val appName         = "heatmap"
+    val appName         = "ophan-heatmap"
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
