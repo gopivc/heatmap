@@ -1,6 +1,6 @@
 {
     "packages":{
-        "heatmap":{
+        "ophan-heatmap":{
             "type":"autoscaling",
             "data":{
                 "bucket":"ophan-dist"
