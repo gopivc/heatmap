@@ -12,10 +12,10 @@
             "depends" : ["artifactUploadOnly", "deployOnly"]
         },
         "deployOnly":{
-            "actionsPerHost": ["heatmap.deploy"]
+            "actionsPerHost": ["ophan-heatmap.deploy"]
         },
         "artifactUploadOnly":{
-            "actionsBeforeApp": ["heatmap.uploadArtifacts"]
+            "actionsBeforeApp": ["ophan-heatmap.uploadArtifacts"]
         }
     }
 }
