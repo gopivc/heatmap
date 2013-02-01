@@ -1,13 +1,9 @@
 {
     "packages":{
         "heatmap":{
-            "type":"executable-jar-webapp",
+            "type":"autoscaling",
             "data":{
-                "port":"9000",
-                "bucket":"ophan-dist",
-                "healthcheck_paths":[
-                    "/health-check"
-                ]
+                "bucket":"ophan-dist"
             }
         }
     },
