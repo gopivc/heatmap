@@ -3,7 +3,6 @@ package controllers
 import play.api.mvc.{Action, Controller}
 import play.api.libs.ws.WS
 import net.liftweb.json
-import json.DefaultFormats
 import org.joda.time.DateTime
 import lib.{Click, Backend}
 
@@ -11,7 +10,7 @@ import lib.{Click, Backend}
 object SNS extends Controller {
 
   def receive() = Action { request =>
-    implicit val formats = DefaultFormats.lossless ++ net.liftweb.json.ext.JodaTimeSerializers.all
+    implicit val formats = net.liftweb.json.DefaultFormats.lossless ++ net.liftweb.json.ext.JodaTimeSerializers.all
 
     request.body.asText map { text =>
       val notification = json.parse(text).extract[SNSNotification]
@@ -62,3 +61,5 @@ object SNS extends Controller {
   
   case class SNSNotification(Message: String, TopicArn: String, Type: String, Token: Option[String])
 }
+
+case class Stuff(dt: DateTime)
