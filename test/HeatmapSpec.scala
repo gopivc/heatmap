@@ -60,5 +60,5 @@ class HeatmapSpec extends Specification{
     val n = SNS.SNSNotification(Serialization.write(views), "topic", "Notification", None)
     Serialization.write(n)
   }
-  implicit val formats = DefaultFormats ++ net.liftweb.json.ext.JodaTimeSerializers.all
+  implicit val formats = DefaultFormats.lossless ++ net.liftweb.json.ext.JodaTimeSerializers.all
 }

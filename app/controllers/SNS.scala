@@ -11,7 +11,7 @@ import lib.{Click, Backend}
 object SNS extends Controller {
 
   def receive() = Action { request =>
-    implicit val formats = DefaultFormats ++ net.liftweb.json.ext.JodaTimeSerializers.all
+    implicit val formats = DefaultFormats.lossless ++ net.liftweb.json.ext.JodaTimeSerializers.all
 
     request.body.asText map { text =>
       val notification = json.parse(text).extract[SNSNotification]
