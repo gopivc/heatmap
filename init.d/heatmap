@@ -6,7 +6,7 @@
 . /etc/rc.d/init.d/functions
 
 USER=jvmuser
-APP_NAME=heatmap
+APP_NAME=ophan-heatmap
 APP_HOME=/executable-jar-apps/$APP_NAME
 PIDFILE=$APP_HOME/RUNNING_PID
 RETVAL=0
